@@ -1,0 +1,35 @@
+name: TEST FLOW
+
+on:
+  pull_request:        # Runs automatically on PR events
+    types: [opened, synchronize, reopened]
+
+env:
+  ACTIONS_RUNNER_DEBUG: false
+  CI_COMMIT_MESSAGE: CI Build Artifacts
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  sync-catalogs:
+    name: Sync and Release Extension Catalog
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        if: steps.check_title.outputs.match == 'true'
+        uses: actions/checkout@v4
+
+      
+      - name: Create Release tag in repo
+        if: steps.check_title.outputs.match == 'true'
+        id: create-release-tag
+        run: |
+          gh release create v2.12.1 \
+            --title "Release extensions catalog v2.12.1" \
+            --notes "Automated release from workflow: \n\n\n\n test"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
